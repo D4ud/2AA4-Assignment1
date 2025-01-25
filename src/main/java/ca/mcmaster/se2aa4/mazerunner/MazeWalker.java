@@ -2,7 +2,6 @@ package ca.mcmaster.se2aa4.mazerunner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,28 +15,26 @@ public class MazeWalker {
     private int endRow = -1;
 
     public MazeWalker(String filePath) {
-        readMaze(filePath);
-        findStartAndEndPoints();
+        processMaze(filePath);
+        locatePoints();
     }
 
-    public void readMaze(String filePath) {
-        List<String> mazeRows = new ArrayList<>();
+    public void processMaze(String filePath) {
+        List<String> mazeLineRow = new ArrayList<>();
         int maxCols = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                mazeRows.add(line);
+                mazeLineRow.add(line);
                 maxCols = Math.max(maxCols, line.length());
             }
-            if (mazeRows.isEmpty()) {
-                throw new IllegalStateException("/!\\ The maze is empty. /!\\");
+            if (mazeLineRow.isEmpty()) {
+                throw new IllegalStateException("The maze is empty");
             }
-
-            int rows = mazeRows.size();
+            int rows = mazeLineRow.size();
             maze = new char[rows][maxCols];
-
             for (int i = 0; i < rows; i++) {
-                String row = mazeRows.get(i);
+                String row = mazeLineRow.get(i);
                 for (int j = 0; j < maxCols; j++) {
                     maze[i][j] = (j < row.length()) ? row.charAt(j) : ' ';
                 }
@@ -47,7 +44,7 @@ public class MazeWalker {
         }
     }
 
-    private void findStartAndEndPoints() {
+    private void locatePoints() {
         for (int i = 0; i < maze.length; i++) {
             if (maze[i][0] == ' ') {
                 startRow = i;
@@ -56,14 +53,12 @@ public class MazeWalker {
                 endRow = i;
             }
         }
-
         if (startRow == -1 || endRow == -1) {
-            logger.error("/!\\ No valid start/end points found in the maze. /!\\");
-            throw new IllegalStateException("Missing start or end points.");
+            logger.error("/!\\ No valid start/end points found in the maze /!\\");
+            throw new IllegalStateException("Missing start or end points");
         }
-
-        logger.info("Start point identified at ({}, 0)", startRow);
-        logger.info("End point identified at ({}, {})", endRow, maze[0].length - 1);
+        logger.info("Start point at ({}, 0)", startRow);
+        logger.info("End point at ({}, {})", endRow, maze[0].length - 1);
     }
 
     public boolean validatePath(String inputtedPath) {
@@ -76,13 +71,13 @@ public class MazeWalker {
             switch (step) {
                 case 'F':
                     if (direction % 4 == 0) {
-                        currentPosition.moveForward();
+                        currentPosition.moveNorth();
                     } else if (direction % 4 == 1) {
-                        currentPosition.moveRight();
+                        currentPosition.moveEast();
                     } else if (direction % 4 == 2) {
-                        currentPosition.moveBack();
+                        currentPosition.moveSouth();
                     } else {
-                        currentPosition.moveLeft();
+                        currentPosition.moveWest();
                     }
                     if (!isMoveValid(currentPosition)) {
                         logger.error("/!\\ Invalid move at ({}, {}) /!\\", currentPosition.row, currentPosition.col);
@@ -96,12 +91,12 @@ public class MazeWalker {
                     direction = (direction - 1 + 4) % 4;
                     break;
                 default:
-                    logger.error("/!\\ Invalid character in path: {} /!\\", step);
+                    logger.error("/!\\ Invalid character: {} /!\\", step);
                     return false;
             }
         }
 
-        return currentPosition.equalsEachOther(finalPosition);
+        return currentPosition.equivalent(finalPosition);
     }
 
     private boolean isMoveValid(Position position) {
@@ -120,20 +115,20 @@ public class MazeWalker {
             this.row = r;
             this.col = c;
         }
-        void moveForward() {
+        void moveNorth() {
             col += 1;
         }
-        void moveRight() {
+        void moveEast() {
             row += 1;
         }
-        void moveLeft() {
+        void moveWest() {
             row -= 1;
         }
-        void moveBack() {
+        void moveSouth() {
             col -= 1;
         }
-        public boolean equalsEachOther(Position otherPosition) {
-            return this.row == otherPosition.row && this.col == otherPosition.col;
+        public boolean equivalent(Position pos) {
+            return this.row == pos.row && this.col == pos.col;
         }
     }
 }

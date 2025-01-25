@@ -25,7 +25,7 @@ public class MazeRunner {
                 if (cmd.hasOption("p")) {
                     String pathSequence = cmd.getOptionValue("p").replaceAll(" ", "");
                     boolean isValid = mazeWalker.validatePath(pathSequence);
-                    System.out.println(isValid ? "correct path" : "incorrect path");
+                    logger.info(isValid ? "correct path" : "incorrect path");
                 } else {
                     printMaze(mazeWalker);
                 }
