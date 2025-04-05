@@ -6,45 +6,41 @@ import java.util.List;
 import java.util.Set;
 
 public class RightHandMazeSolver extends AbstractMazeSolver {
-    public List<String> computePath(char[][] mazeGrid, MazeCoordinate startCoord, MazeCoordinate exitCoord) {
-        this.mazeGrid = mazeGrid;
-        this.currentPosition = new MazeCoordinate(startCoord);
-        this.exitPosition = new MazeCoordinate(exitCoord);
-        this.currentDirection = MazeDirection.EAST;
-        this.movementPath = new ArrayList<>();
-        Set<String> visitedStates = new HashSet<>();
-        while (!currentPosition.equalsTo(exitPosition)) {
-            String stateSignature = currentPosition.getRow() + "," + currentPosition.getCol() + "," + currentDirection;
-            if (visitedStates.contains(stateSignature)) {
-                break;
-            }
-            visitedStates.add(stateSignature);
-            MazeCoordinate rightCoordinate = new MazeCoordinate(currentPosition);
-            advancePosition(rightCoordinate, currentDirection.turnRight());
-            MazeCoordinate frontCoordinate = new MazeCoordinate(currentPosition);
-            advancePosition(frontCoordinate, currentDirection);
-            MazeCoordinate leftCoordinate = new MazeCoordinate(currentPosition);
-            advancePosition(leftCoordinate, currentDirection.turnLeft());
-            if (isPositionAccessible(rightCoordinate)) {
-                currentDirection = currentDirection.turnRight();
-                movementPath.add("R");
-                moveForward();
-            } else if (isPositionAccessible(frontCoordinate)) {
-                moveForward();
-            } else if (isPositionAccessible(leftCoordinate)) {
-                currentDirection = currentDirection.turnLeft();
-                movementPath.add("L");
-                moveForward();
-            } else {
-                currentDirection = currentDirection.turnAround();
-                movementPath.add("RR");
-            }
-        }
-        return movementPath;
+    private Set<String> visitedStates;
+
+    @Override
+    protected void setup() {
+        visitedStates = new HashSet<>();
     }
 
-    private void moveForward() {
-        movementPath.add("F");
-        advancePosition(currentPosition, currentDirection);
+    @Override
+    protected void makeMove() {
+        String stateSignature = currentPosition.getRow() + "," + currentPosition.getCol() + "," + currentDirection;
+        if (visitedStates.contains(stateSignature)) {
+            return;
+        }
+        visitedStates.add(stateSignature);
+
+        MazeCoordinate right = new MazeCoordinate(currentPosition);
+        advancePosition(right, currentDirection.turnRight());
+        MazeCoordinate front = new MazeCoordinate(currentPosition);
+        advancePosition(front, currentDirection);
+        MazeCoordinate left = new MazeCoordinate(currentPosition);
+        advancePosition(left, currentDirection.turnLeft());
+
+        if (isPositionAccessible(right)) {
+            currentDirection = currentDirection.turnRight();
+            movementPath.add("R");
+            moveForward();
+        } else if (isPositionAccessible(front)) {
+            moveForward();
+        } else if (isPositionAccessible(left)) {
+            currentDirection = currentDirection.turnLeft();
+            movementPath.add("L");
+            moveForward();
+        } else {
+            currentDirection = currentDirection.turnAround();
+            movementPath.add("RR");
+        }
     }
 }

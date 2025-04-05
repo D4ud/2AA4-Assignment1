@@ -9,8 +9,10 @@ public class Main {
             String mazeFilePath = args[1];
             String solverName = (args.length == 4) ? args[3] : "righthand";
             MazeMap mazeGrid = new MazeMap(mazeFilePath);
-            MazeSolverAlgorithm solverAlgorithm = selectSolverAlgorithm(solverName);
-            if (solverAlgorithm == null) {
+            MazeSolverAlgorithm solverAlgorithm;
+            try {
+                solverAlgorithm = MazeSolverFactory.createSolver(solverName);
+            } catch (IllegalArgumentException e) {
                 System.out.println("Invalid solver type: " + solverName);
                 return;
             }
@@ -28,14 +30,6 @@ public class Main {
             System.out.println(valid ? "correct path" : "incorrect path");
         } else {
             System.out.println("Usage: '-i MAZE_FILE' OR '-i MAZE_FILE -p PATH_SEQUENCE' OR '-i MAZE_FILE -method {tremaux, righthand}'");
-        }
-    }
-
-    private static MazeSolverAlgorithm selectSolverAlgorithm(String solverName) {
-        switch (solverName.toLowerCase()) {
-            case "righthand": return new RightHandMazeSolver();
-            case "tremaux": return new TremauxMazeSolver();
-            default: return null;
         }
     }
 }
