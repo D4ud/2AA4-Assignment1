@@ -39,6 +39,11 @@ public class MazeMap {
         computeEntryExitCoordinates();
     }
 
+    protected MazeMap(char[][] grid) {
+        this.mazeGrid = grid;
+        computeEntryExitCoordinates();
+    }
+
     private void computeEntryExitCoordinates() {
         MazeCoordinate entry = null;
         MazeCoordinate exit = null;
